@@ -1,0 +1,166 @@
+1                                                          The SAS System                            12:06 Monday, December 12, 2011
+
+NOTE: Copyright (c) 2002-2010 by SAS Institute Inc., Cary, NC, USA. 
+NOTE: SAS (r) Proprietary Software 9.3 (TS1M0) 
+      Licensed to MARRIOTT INTERNATIONAL INC, Site 70032846.
+NOTE: This session is executing on the Linux 2.6.18-274.el5 (LIN X64) platform.
+
+
+
+You are running SAS 9. Some SAS 8 files will be automatically converted 
+by the V9 engine; others are incompatible.  Please see 
+http://support.sas.com/rnd/migration/planning/platform/64bit.html
+
+PROC MIGRATE will preserve current SAS file attributes and is 
+recommended for converting all your SAS libraries from any 
+SAS 8 release to SAS 9.  For details and examples, please see
+http://support.sas.com/rnd/migration/index.html
+
+
+This message is contained in the SAS news file, and is presented upon
+initialization.  Edit the file "news" in the "misc/base" directory to
+display site-specific news and information in the program log.
+The command line option "-nonews" will prevent this display.
+
+
+
+
+NOTE: SAS initialization used:
+      real time           0.08 seconds
+      cpu time            0.02 seconds
+      
+1          %macro convert_ds;
+2          
+3              options mprint symbolgen mlogic ;
+4          
+5              %let dspathname = %sysfunc(sysparm());
+6          
+7              data _null_;
+8                  length dspath dspath2 $200;
+9                  dspathname = sysparm() ;
+10                 dspath2 = dspathname;
+11                 dspath='';
+12                 do while(index(dspath2,'/') > 0);
+13                     dspath = trim(left(dspath)) || substr(dspath2,1,index(dspath2,'/'));
+14                     dspath2 = substr(dspath2,index(dspath2,'/')+1);
+15                 end;
+16                 call symput('ds_path',trim(left(dspath)));
+17                 call symput('ds_name',trim(left(dspath2)));
+18             run;
+19         
+20             %if %length(&ds_path) = 0 or %length(&ds_name) = 0 %then %do;
+21         
+22                 %put Error: Parameter ds_path &ds_path or ds_name &ds_name ;
+23                 %put        were specified incorrectly. ;
+24                 %goto macrend;
+25         
+26         	%end;
+27         
+28             libname dspath "&ds_path";
+29         
+2                                                          The SAS System                            12:06 Monday, December 12, 2011
+
+30             %let rc = %sysfunc(libref(dspath));
+31             %if &rc > 0 %then %do;
+32         
+33                 %put Error: Unable to assign libref to &ds_path ;
+34                 %goto macrend;
+35         
+36             %end;
+37         
+38             %let rc = %sysfunc(exist(dspath.&ds_name));
+39             %if &rc = 0 %then %do;
+40         
+41                 %put Error: Unable to find the &ds_name data set in the location &ds_path ;
+42                 %goto macrend;
+43         
+44             %end;
+45         
+46         
+47             data &ds_name;
+48                 set dspath.&ds_name;
+49             run;
+50         
+51             data dspath.&ds_name;
+52                 set &ds_name;
+53             run;
+54         
+55         
+56             %macrend:
+57         
+58         
+59         %mend;
+60         %convert_ds;
+MPRINT(CONVERT_DS):   mlogic ;
+MLOGIC(CONVERT_DS):  %LET (variable name is DSPATHNAME)
+MPRINT(CONVERT_DS):   data _null_;
+MPRINT(CONVERT_DS):   length dspath dspath2 $200;
+MPRINT(CONVERT_DS):   dspathname = sysparm() ;
+MPRINT(CONVERT_DS):   dspath2 = dspathname;
+MPRINT(CONVERT_DS):   dspath='';
+MPRINT(CONVERT_DS):   do while(index(dspath2,'/') > 0);
+MPRINT(CONVERT_DS):   dspath = trim(left(dspath)) || substr(dspath2,1,index(dspath2,'/'));
+MPRINT(CONVERT_DS):   dspath2 = substr(dspath2,index(dspath2,'/')+1);
+MPRINT(CONVERT_DS):   end;
+MPRINT(CONVERT_DS):   call symput('ds_path',trim(left(dspath)));
+MPRINT(CONVERT_DS):   call symput('ds_name',trim(left(dspath2)));
+MPRINT(CONVERT_DS):   run;
+
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+SYMBOLGEN:  Macro variable DS_PATH resolves to /fcst/SAS_HPF/data/common/transient/
+SYMBOLGEN:  Macro variable DS_NAME resolves to historical_baseline_weights
+MLOGIC(CONVERT_DS):  %IF condition %length(&ds_path) = 0 or %length(&ds_name) = 0 is FALSE
+SYMBOLGEN:  Macro variable DS_PATH resolves to /fcst/SAS_HPF/data/common/transient/
+MPRINT(CONVERT_DS):   libname dspath "/fcst/SAS_HPF/data/common/transient/";
+NOTE: Libref DSPATH was successfully assigned as follows: 
+      Engine:        V9 
+3                                                          The SAS System                            12:06 Monday, December 12, 2011
+
+      Physical Name: /fcst/SAS_HPF/data/common/transient
+MLOGIC(CONVERT_DS):  %LET (variable name is RC)
+SYMBOLGEN:  Macro variable RC resolves to 0
+MLOGIC(CONVERT_DS):  %IF condition &rc > 0 is FALSE
+MLOGIC(CONVERT_DS):  %LET (variable name is RC)
+SYMBOLGEN:  Macro variable DS_NAME resolves to historical_baseline_weights
+SYMBOLGEN:  Macro variable RC resolves to 1
+MLOGIC(CONVERT_DS):  %IF condition &rc = 0 is FALSE
+SYMBOLGEN:  Macro variable DS_NAME resolves to historical_baseline_weights
+MPRINT(CONVERT_DS):   data historical_baseline_weights;
+SYMBOLGEN:  Macro variable DS_NAME resolves to historical_baseline_weights
+MPRINT(CONVERT_DS):   set dspath.historical_baseline_weights;
+NOTE: Data file DSPATH.HISTORICAL_BASELINE_WEIGHTS.DATA is in a format that is native to another host, or the file encoding does 
+      not match the session encoding. Cross Environment Data Access will be used, which might require additional CPU resources and 
+      might reduce performance.
+MPRINT(CONVERT_DS):   run;
+
+NOTE: There were 994 observations read from the data set DSPATH.HISTORICAL_BASELINE_WEIGHTS.
+NOTE: The data set WORK.HISTORICAL_BASELINE_WEIGHTS has 994 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+
+SYMBOLGEN:  Macro variable DS_NAME resolves to historical_baseline_weights
+MPRINT(CONVERT_DS):   data dspath.historical_baseline_weights;
+SYMBOLGEN:  Macro variable DS_NAME resolves to historical_baseline_weights
+MPRINT(CONVERT_DS):   set historical_baseline_weights;
+MPRINT(CONVERT_DS):   run;
+
+NOTE: There were 994 observations read from the data set WORK.HISTORICAL_BASELINE_WEIGHTS.
+NOTE: The data set DSPATH.HISTORICAL_BASELINE_WEIGHTS has 994 observations and 7 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+
+MLOGIC(CONVERT_DS):  Ending execution.
+
+NOTE: SAS Institute Inc., SAS Campus Drive, Cary, NC USA 27513-2414
+NOTE: The SAS System used:
+      real time           0.13 seconds
+      cpu time            0.05 seconds
+      
