@@ -7,6 +7,7 @@
 ** Design Module: Section ? of the HPF Forecast System Design Document      **;
 ** By:      Andrew Hamilton, Oct 1st 2008.                                  **;
 **                                                                          **;
+** Note that this program is designed to work with development.             **;
 ******************************************************************************;
 
 %macro assign_events_libref (db_name) ;
